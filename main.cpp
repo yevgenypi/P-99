@@ -23,6 +23,7 @@ int main() {
     static_assert(SumFoldR<CreateList<1, 2, 3, 4, 5>::list>::value == 1 + 2 + 3 + 4 + 5);
 
     static_assert(Last<CreateList<1, 2, 3, 4, 5>::list>::value == 5);
+
     static_assert(LastButOne<CreateList<1, 2, 3, 4, 5>::list>::value == 4);
 
     static_assert(KthElement<CreateList<1, 2, 3, 4, 5>::list, 1>::value == 1);
