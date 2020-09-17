@@ -109,8 +109,13 @@ namespace ct_list {
     };
 
     template<int A, int B>
-    struct Second {
+    struct SecondFunc {
         static constexpr int value = B;
+    };
+
+    template<int A, int B>
+    struct MinFunc {
+        static constexpr int value = (A < B) ? A : B;
     };
 
 
@@ -127,7 +132,7 @@ namespace ct_list {
     // X = d
     template<typename List>
     struct Last {
-        static constexpr int value = FoldL<List, Second, List::value>::value;
+        static constexpr int value = FoldL<List, SecondFunc, List::value>::value;
     };
 
     template<>
@@ -473,6 +478,46 @@ namespace ct_list {
     template<unsigned A>
     struct Range<A, A> {
         typedef Cons<A, Nil> list;
+    };
+
+    // Find minimal element
+    template <typename List>
+    struct Least {
+        static constexpr int value = FoldL<List, MinFunc, std::numeric_limits<int>::max()>::value;
+    };
+
+    // Remove value from list
+    template <typename List, int V, typename T = void>
+    struct Extract;
+
+    template <typename List, int V>
+    struct Extract<List, V, typename std::enable_if<(List::value == V), void>::type> {
+        typedef typename List::tail list;
+    };
+
+    template <typename List, int V>
+    struct Extract<List, V, typename std::enable_if<(List::value != V), void>::type>{
+        typedef Cons<List::value, typename Extract<typename List::tail, V>::list> list;
+    };
+
+    template <int V>
+    struct Extract<Nil, V> {
+        typedef Nil list;
+    };
+
+
+    // sort list
+    template <typename List>
+    struct Sort {
+    private:
+        static const int min = Least<List>::value;
+    public:
+        typedef Cons<min, typename Sort<typename Extract<List, min>::list>::list> list;
+    };
+
+    template <>
+    struct Sort<Nil> {
+        typedef Nil list;
     };
 
 }

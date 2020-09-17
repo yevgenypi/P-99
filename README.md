@@ -1,5 +1,5 @@
 # P-99
-Compiled time List with C++ templates + some useful functions inspired by 
+Compile time list with C++ templates + some useful functions inspired by 
 [Ninety-Nine Prolog Problems](https://www.ic.unicamp.br/~meidanis/courses/mc336/2009s2/prolog/problemas/)
 
 #### List definition

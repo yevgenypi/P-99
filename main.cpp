@@ -80,6 +80,17 @@ int main() {
     static_assert(IsSame<Range<5, 5>::list, CreateList<5>::list>::value);
     PrintList<Range<4, 9>::list>();
 
+    static_assert(Least<CreateList<1, 2, 3, 4, 5>::list>::value == 1);
+    static_assert(Least<CreateList<5, 4, 3, 2, 1>::list>::value == 1);
+
+    static_assert(IsSame<Extract<CreateList<5, 4, 3, 2, 1>::list, 1>::list, CreateList<5, 4, 3, 2>::list>::value);
+    static_assert(IsSame<Extract<CreateList<5, 4, 3, 2, 1>::list, 5>::list, CreateList<4, 3, 2, 1>::list>::value);
+    PrintList<Extract<CreateList<5, 4, 3, 2, 1>::list, 3>::list>();
+
+    static_assert(IsSame<Sort<CreateList<5, 4, 3, 2, 1>::list>::list, CreateList<1, 2, 3, 4, 5>::list>::value);
+    static_assert(IsSame<Sort<CreateList<5, 5, 3, 3, 1>::list>::list, CreateList<1, 3, 3, 5, 5>::list>::value);
+    PrintList<Sort<CreateList<5, 5, 5, 3, 2, 1>::list>::list>();
+
     return 0;
 }
 
