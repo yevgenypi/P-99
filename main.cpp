@@ -91,6 +91,29 @@ int main() {
     static_assert(IsSame<Sort<CreateList<5, 5, 3, 3, 1>::list>::list, CreateList<1, 3, 3, 5, 5>::list>::value);
     PrintList<Sort<CreateList<5, 5, 5, 3, 2, 1>::list>::list>();
 
+    PrintList<RandomSelect<CreateList<1, 2, 3, 4, 5, 6, 7, 8, 9, 0>::list, 3>::list>();
+
+    static_assert(IsSame<Sort<RandomSelect<CreateList<0, 1, 2, 3, 4, 5, 6, 7, 8, 9>::list, 10>::list>::list, CreateList<0, 1, 2, 3, 4, 5, 6, 7, 8, 9>::list>::value
+        && !IsSame<RandomSelect<CreateList<0, 1, 2, 3, 4, 5, 6, 7, 8, 9>::list, 10>::list, CreateList<0, 1, 2, 3, 4, 5, 6, 7, 8, 9>::list>::value
+    );
+
+    PrintList<RandomSelect<CreateList<1, 2, 3, 4, 5, 6, 7, 8, 9, 0>::list, 10>::list>();
+
+    static_assert(IsSame<Sort<Lotto<49, 49>::list>::list, Range<1, 49>::list>::value);
+    PrintList<Lotto<6, 49>::list>();
+
+    static_assert(IsSame<Sort<RandomPermutation<CreateList<0, 1, 2, 3, 4>::list>::list>::list, Sort<CreateList<0, 1, 2, 3, 4>::list>::list>::value);
+    PrintList<RandomPermutation<CreateList<1, 2, 3, 4, 5, 6, 7, 8, 9, 0>::list>::list>();
+
+    static_assert(IsSame<Filter<CreateList<0, 1, 2, 3, 4, 5, 6>::list, IsEven>::list, CreateList<0, 2, 4, 6>::list>::value);
+    PrintList<Filter<CreateList<0, 1, 2, 3, 4, 5, 6>::list, IsEven>::list>();
+
+    static_assert(IsSame<CreateList<0, 1, 2, 3, 4, 5, 6>::list, QuickSort<RandomPermutation<CreateList<6, 4, 3, 2, 5, 1, 0>::list>::list>::list>::value);
+    PrintList<QuickSort<CreateList<5, 4, 3, 2, 1>::list>::list>();
+
+    static_assert(IsSame<CreateList<0, 1, 2, 3, 4, 5, 6>::list, QuickSortRand<RandomPermutation<CreateList<6, 4, 3, 2, 5, 1, 0>::list>::list>::list>::value);
+    PrintList<QuickSortRand<CreateList<5, 4, 3, 2, 1>::list>::list>();
+
     return 0;
 }
 

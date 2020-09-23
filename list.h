@@ -3,6 +3,8 @@
 #include <iostream>
 #include <type_traits>
 
+#include "random.h"
+
 namespace ct_list {
 
 // List
@@ -391,6 +393,13 @@ namespace ct_list {
     };
 
 
+    // Concat three lists
+    template<typename Left, typename Middle, typename Right>
+    struct Concat3 {
+        typedef typename Concat<Left, typename Concat<Middle, Right>::list>::list list;
+    };
+
+
     // P19 (**) Rotate a list N places to the left.
     // Examples:
     // ?- rotate([a,b,c,d,e,f,g,h],3,X).
@@ -509,9 +518,7 @@ namespace ct_list {
     // sort list
     template <typename List>
     struct Sort {
-    private:
         static const int min = Least<List>::value;
-    public:
         typedef Cons<min, typename Sort<typename Extract<List, min>::list>::list> list;
     };
 
@@ -520,4 +527,148 @@ namespace ct_list {
         typedef Nil list;
     };
 
+
+    // P23 (**) Extract a given number of randomly selected elements from a list.
+    // The selected items shall be put into a result list.
+    // Example:
+    // ?- rnd_select([a,b,c,d,e,f,g,h],3,L).
+    // L = [e,d,a]
+    template <typename List, unsigned N, typename R = linear_congruential_engine<uint32_t>>
+    struct RandomSelect {
+        typedef typename Next<R>::type Random;
+
+        static constexpr decltype(Random::value) value = (Random::value % Length<List>::value) + 1;
+        typedef Cons<KthElement<List, value>::value, typename RandomSelect<typename RemoveKth<List, value>::list, N - 1, R>::list> list;
+    };
+
+    template <>
+    struct RandomSelect<Nil, 0> {
+        typedef Nil list;
+    };
+
+    template <typename List>
+    struct RandomSelect<List, 0> {
+        typedef Nil list;
+    };
+
+    template <unsigned N>
+    struct RandomSelect<Nil, N> {
+    };
+
+
+    // P24 (*) Lotto: Draw N different random numbers from the set 1..M.
+    // The selected numbers shall be put into a result list.
+    // Example:
+    // ?- rnd_select(6,49,L).
+    // L = [23,1,17,33,21,37]
+    template <unsigned N, unsigned M>
+    struct Lotto {
+        typedef typename RandomSelect<typename Range<1, M>::list, N>::list list;
+    };
+
+
+    // P25 (*) Generate a random permutation of the elements of a list.
+    //E xample:
+    // ?- rnd_permu([a,b,c,d,e,f],L).
+    // L = [b,a,d,c,e,f]
+    template <typename List>
+    struct RandomPermutation {
+        typedef typename RandomSelect<List, Length<List>::value>::list list;
+    };
+
+
+    template <int I>
+    struct IsEven {
+        static const int value = I % 2 == 0;
+    };
+
+    // Filter
+//    template<typename List, template<int A, int B> typename Func, int init = 0>
+//    struct FoldR {
+//        static constexpr int value = Func<List::value, FoldR<typename List::tail, Func, init>::value>::value;
+//    };
+//
+//    template<template<int A, int B> typename Func, int init>
+//    struct FoldR<Nil, Func, init> {
+//        static constexpr int value = init;
+//    };
+
+    template <typename List, template<int> typename Func>
+    struct Filter {
+        typedef typename std::conditional<Func<List::value>::value,
+                    Cons<List::value, typename Filter<typename List::tail, Func>::list>,
+                    typename Filter<typename List::tail, Func>::list>::type list;
+    };
+
+    template <template<int> typename Func>
+    struct Filter<Nil, Func> {
+        typedef Nil list;
+    };
+
+
+    // QuickSort
+    template <typename List, typename T = void>
+    struct QuickSort;
+
+    template <typename List>
+    struct QuickSort<List, typename std::enable_if<(Length<List>::value > 1), void>::type> {
+        static const int pivot = List::value;
+
+        template<int B>
+        struct LessFunc {
+            static constexpr bool value = B < pivot;
+        };
+
+        template<int B>
+        struct GreatEqFunc {
+            static constexpr bool value = !LessFunc<B>::value;
+        };
+
+        typedef typename Filter<typename List::tail, LessFunc>::list left;
+        typedef typename Filter<typename List::tail, GreatEqFunc>::list right;
+
+        typedef typename Concat3<typename QuickSort<left>::list,
+                                 Cons<pivot, Nil>,
+                                 typename QuickSort<right>::list>::list list;
+    };
+
+    template <typename List>
+    struct QuickSort<List, typename std::enable_if<(Length<List>::value <= 1), void>::type> {
+        typedef List list;
+    };
+
+
+    // QuickSort With Rand
+    template <typename List, typename R = linear_congruential_engine<uint32_t>, typename T = void>
+    struct QuickSortRand;
+
+    template <typename List, typename R>
+    struct QuickSortRand<List, R, typename std::enable_if<(Length<List>::value > 1), void>::type> {
+        typedef typename Next<R>::type Random;
+        static const int pivot_index = RandomSelect<List, 1>::value;
+        static const int pivot = KthElement<List, pivot_index>::value;
+        typedef typename Extract<List, pivot>::list rest;
+
+        template<int B>
+        struct LessFunc {
+            static constexpr bool value = B < pivot;
+        };
+
+        template<int B>
+        struct GreatEqFunc {
+            static constexpr bool value = !LessFunc<B>::value;
+        };
+
+        typedef typename Filter<rest, LessFunc>::list left;
+        typedef typename Filter<rest, GreatEqFunc>::list right;
+
+        typedef typename Concat3<typename QuickSortRand<left, R>::list,
+                Cons<pivot, Nil>,
+                typename QuickSortRand<right, R>::list>::list list;
+    };
+
+    template <typename List, typename R>
+    struct QuickSortRand<List, R, typename std::enable_if<(Length<List>::value <= 1), void>::type> {
+        typedef List list;
+    };
 }
