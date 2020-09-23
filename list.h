@@ -645,7 +645,7 @@ namespace ct_list {
     template <typename List, typename R>
     struct QuickSortRand<List, R, typename std::enable_if<(Length<List>::value > 1), void>::type> {
         typedef typename Next<R>::type Random;
-        static const int pivot_index = RandomSelect<List, 1>::value;
+        static const int pivot_index = (Random::value % Length<List>::value) + 1;
         static const int pivot = KthElement<List, pivot_index>::value;
         typedef typename Extract<List, pivot>::list rest;
 
